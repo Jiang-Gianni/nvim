@@ -7,9 +7,12 @@ syntax on
 colorscheme night-owl
 filetype plugin indent on
 set number relativenumber
+set nocp
+filetype plugin on
 set tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 set incsearch
 set nohlsearch
+set hidden
 set autoindent
 set scrolloff=8
 set sidescrolloff=5
@@ -21,7 +24,6 @@ set path+=**
 set showcmd
 set ruler
 let g:netrw_banner=0
-let g:netrw_browse_split=4
 let g:netrw_altv=1
 let g:netrw_liststyle=3
 
@@ -129,3 +131,6 @@ endif
 
 " Snippets
 nnoremap <leader>sife :-1read ~/.vim/snippets/go/iferr<CR>jf"a
+
+nnoremap <leader>ex vip:!sh<CR>
+

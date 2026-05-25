@@ -1,4 +1,9 @@
 ```bash
+if type rg &> /dev/null; then
+  export FZF_DEFAULT_COMMAND = 'rg --files --hidden --follow -g "!.git"'
+  export FZF_DEFAULT_OPTS='-m'
+fi
+
 cd ~/Downloads
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
 chmod u+x nvim-linux-x86_64.appimage
