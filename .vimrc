@@ -4,10 +4,10 @@ endif
 
 let mapleader = " "
 syntax on
-colorscheme night-owl
 filetype plugin indent on
 set number relativenumber
 set nocp
+set grepprg=rg\ --vimgrep\ --smart-case\ --follow
 filetype plugin on
 set tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 set incsearch
@@ -42,6 +42,7 @@ function! s:ensure(repo)
   execute 'set runtimepath+=' . fnameescape(path)
 endfunction
 
+call s:ensure('folke/tokyonight.nvim')
 call s:ensure('junegunn/fzf')
 call s:ensure('junegunn/fzf.vim')
 call s:ensure('vim-airline/vim-airline')
@@ -59,8 +60,14 @@ set updatetime=100
 set signcolumn=yes
 set cursorline
 
-call s:ensure('mbbill/undotree')
 nnoremap <leader>u :UndotreeToggle<CR>
+
+call s:ensure('romus204/tree-sitter-manager.nvim')
+lua <<EOF
+require("tree-sitter-manager").setup()
+require("tokyonight").setup()
+vim.cmd.colorscheme("tokyonight-night")
+EOF
 
 " Keybindings insert mode
 inoremap <C-c> <Esc>
@@ -95,6 +102,9 @@ nnoremap <C-b> :Buffers<CR>
 
 nnoremap <F2> :LspRename<CR>
 
+highlight LspReferenceText guibg=#2a2d3a
+highlight LspReferenceRead guibg=#2a2d3a
+highlight LspReferenceWrite guibg=#2a2d3a
 
 " Go LSP
 if executable('gopls')
