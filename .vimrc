@@ -62,6 +62,7 @@ set cursorline
 
 nnoremap <leader>u :UndotreeToggle<CR>
 
+call s:ensure('mbbill/undotree')
 call s:ensure('romus204/tree-sitter-manager.nvim')
 lua <<EOF
 require("tree-sitter-manager").setup()
