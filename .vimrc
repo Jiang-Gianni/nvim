@@ -57,6 +57,9 @@ set updatetime=100
 set signcolumn=yes
 set cursorline
 
+call s:ensure('mbbill/undotree')
+nnoremap <leader>u :UndotreeToggle<CR>
+
 " Keybindings insert mode
 inoremap <C-c> <Esc>
 inoremap <c-s> <Esc>:w<CR>
