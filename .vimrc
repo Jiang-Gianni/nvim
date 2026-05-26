@@ -1,14 +1,10 @@
-if (has("termguicolors"))
- set termguicolors
-endif
-
 let mapleader = " "
-syntax on
 filetype plugin indent on
+set termguicolors
+syntax on
 set number relativenumber
 set nocp
 set grepprg=rg\ --vimgrep\ --smart-case\ --follow
-filetype plugin on
 set tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 set incsearch
 set nohlsearch
@@ -27,8 +23,6 @@ let g:netrw_banner=0
 let g:netrw_altv=1
 let g:netrw_liststyle=3
 
-highlight PmenuSel guibg=#d97706 guifg=#ffffff
-
 let s:plugin_dir = expand('~/.vim/plugged')
 function! s:ensure(repo)
   let name = split(a:repo, '/')[-1]
@@ -42,9 +36,25 @@ function! s:ensure(repo)
   execute 'set runtimepath+=' . fnameescape(path)
 endfunction
 
-call s:ensure('folke/tokyonight.nvim')
 call s:ensure('junegunn/fzf')
 call s:ensure('junegunn/fzf.vim')
+nnoremap <leader>fr :Rg <CR>
+nnoremap <leader>fR :RG <CR>
+nnoremap <leader>ff :Files<CR>
+nnoremap <leader>fg :GFiles?<CR>
+nnoremap <leader>fc :Colors<CR>
+nnoremap <leader>fl :Lines<CR>
+nnoremap <leader>fc :Changes<CR>
+nnoremap <leader>fm :Marks<CR>
+nnoremap <leader>fj :Jumps<CR>
+nnoremap <leader>fw :Windows<CR>
+nnoremap <leader>fh :History<CR>
+nnoremap <leader>fb :Buffers<CR>
+nnoremap <leader>fG :BCommits<CR>
+nnoremap <leader>fp :Maps<CR>
+nnoremap <leader>fe :Commands<CR>
+nnoremap <leader>ft :Helptags<CR>
+
 call s:ensure('vim-airline/vim-airline')
 let g:airline#extensions#tabline#enabled = 1
 
@@ -53,17 +63,35 @@ call s:ensure('prabirshrestha/asyncomplete.vim')
 call s:ensure('prabirshrestha/asyncomplete-lsp.vim')
 let g:asyncomplete_auto_popup = 1
 let g:asyncomplete_auto_completeopt = 1
+nnoremap <leader>lh :LspHover <CR>
+nnoremap <leader>la :LspCodeAction <CR>
+nnoremap <leader>lf :LspDefinition<CR>
+nnoremap <leader>lpf :LspPeekDefinition<CR>
+nnoremap <leader>ldd :LspDocumentDiagnostics <CR>
+nnoremap <leader>lnd :LspNextDiagnostic<CR>
+nnoremap <leader>lpd :LspPreviousDiagnostic<CR>
+nnoremap <leader>lne :LspNextError<CR>
+nnoremap <leader>lpe :LspPreviousError<CR>
+nnoremap <leader>lr :LspReferences<CR>
+nnoremap <leader>lnr :LspNextReference<CR>
+nnoremap <leader>lpr :LspPreviousReference<CR>
+nnoremap <leader>lnw :LspNextWarning<CR>
+nnoremap <leader>lpw :LspPreviousWarning<CR>
+nnoremap <F2> :LspRename<CR>
 
 call s:ensure('tpope/vim-fugitive')
 call s:ensure('airblade/vim-gitgutter')
 set updatetime=100
 set signcolumn=yes
 set cursorline
-
-nnoremap <leader>u :UndotreeToggle<CR>
+nnoremap <leader>gn :GitGutterNextHunk<CR>
+nnoremap <leader>gp :GitGutterPrevHunk<CR>
 
 call s:ensure('mbbill/undotree')
+nnoremap <leader>u :UndotreeToggle<CR>
+
 call s:ensure('romus204/tree-sitter-manager.nvim')
+call s:ensure('folke/tokyonight.nvim')
 lua <<EOF
 require("tree-sitter-manager").setup()
 require("tokyonight").setup()
@@ -71,41 +99,21 @@ vim.cmd.colorscheme("tokyonight-night")
 EOF
 
 " Keybindings insert mode
-inoremap <C-c> <Esc>
-inoremap <c-s> <Esc>:w<CR>
-" suggestions/autocomplete trigger
-inoremap <C-n> <C-x><C-o>
+inoremap qq <Esc>
+inoremap ww <Esc>:w<CR>
 
 " Keybindings normal mode
-nnoremap <C-q> :bd!<CR>
-nnoremap <C-f> :Rg <CR>
-nnoremap <C-p> :Files<CR>
+nnoremap <leader>q :bd!<CR>
+nnoremap <leader>ee <c-z>
+nnoremap <leader>ei <c-i>
+nnoremap <leader>eo <c-o>
+nnoremap <leader>ex vip:!sh<CR>
+nnoremap <leader>eh :let @+ = expand('%')<CR>
 
-nnoremap <c-s> :w<CR>
-nnoremap <C-t> :LspHover <CR>
-
-nnoremap <C-l> :cnext<CR>
-nnoremap <C-u> :cprev<CR>
-nnoremap <C-y> :LspReferences<CR>
-nnoremap <C-g> :LspDefinition<CR>
-
-nnoremap <C-n> :History<CR>
-nnoremap <C-e> <c-z>
-" <C-i> and <C-o> to navigate back and forward
-
-nnoremap <leader>gn :GitGutterNextHunk<CR>
-nnoremap <leader>gp :GitGutterPrevHunk<CR>
-
-nnoremap <C-m> :bnext<CR>
-nnoremap <C-d> :bprevious<CR>
-nnoremap <C-h> :let @+ = expand('%')<CR>
-nnoremap <C-b> :Buffers<CR>
-
-nnoremap <F2> :LspRename<CR>
-
-highlight LspReferenceText guibg=#2a2d3a
-highlight LspReferenceRead guibg=#2a2d3a
-highlight LspReferenceWrite guibg=#2a2d3a
+nnoremap <leader>bn :bnext<CR>
+nnoremap <leader>bb :bprevious<CR>
+nnoremap <leader>cn :cnext<CR>
+nnoremap <leader>cc :cprevious<CR>
 
 " Go LSP
 if executable('gopls')
@@ -132,8 +140,6 @@ autocmd BufWritePre *.go silen call execute('LspCodeAction source.organizeImport
 " Diagnostic
 let g:lsp_diagnostics_virtual_text_prefix = "● "
 let g:lsp_diagnostics_virtual_text_align = "after"
-highlight LspErrorText   ctermfg=red guifg=#ff6b6b
-highlight LspWarningText ctermfg=yellow guifg=#f7d794
 
 set autoread
 if executable('templ')
@@ -143,5 +149,4 @@ endif
 " Snippets
 nnoremap <leader>sife :-1read ~/.vim/snippets/go/iferr<CR>jf"a
 
-nnoremap <leader>ex vip:!sh<CR>
 

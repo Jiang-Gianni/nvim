@@ -20,6 +20,8 @@ cp -r snippets ~/.vim/
 cp .vimrc ~/.vimrc
 mkdir -p ~/.config/nvim
 ln -s ~/.vimrc ~/.config/nvim/init.vim
+
+$(brew --prefix)/opt/fzf/install
 ```
 
 ### Maybe useful stuff
