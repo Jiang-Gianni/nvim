@@ -38,22 +38,23 @@ endfunction
 
 call s:ensure('junegunn/fzf')
 call s:ensure('junegunn/fzf.vim')
-nnoremap <leader>fr :Rg <CR>
-nnoremap <leader>fR :RG <CR>
-nnoremap <leader>ff :Files<CR>
+nnoremap <leader>fr :Rg! <CR>
+nnoremap <leader>fR :RG! <CR>
+nnoremap <leader>ff :Files!<CR>
 nnoremap <leader>fg :GFiles?<CR>
-nnoremap <leader>fG :BCommits<CR>
-nnoremap <leader>fc :Colors<CR>
-nnoremap <leader>fl :Lines<CR>
-nnoremap <leader>fc :Changes<CR>
-nnoremap <leader>fm :Marks<CR>
-nnoremap <leader>fj :Jumps<CR>
-nnoremap <leader>fw :Windows<CR>
-nnoremap <leader>fh :History<CR>
-nnoremap <leader>fb :Buffers<CR>
-nnoremap <leader>fp :Maps<CR>
-nnoremap <leader>fe :Commands<CR>
-nnoremap <leader>ft :Helptags<CR>
+nnoremap <leader>fG :BCommits!<CR>
+nnoremap <leader>fl :Lines!<CR>
+nnoremap <leader>fc :Commits!<CR>
+nnoremap <leader>fC :Changes!<CR>
+nnoremap <leader>fm :Marks!<CR>
+nnoremap <leader>fj :Jumps!<CR>
+nnoremap <leader>fw :Windows!<CR>
+nnoremap <leader>fh :History!<CR>
+nnoremap <leader>fH :History:!<CR>
+nnoremap <leader>fb :Buffers!<CR>
+nnoremap <leader>fp :Maps!<CR>
+nnoremap <leader>fe :Commands!<CR>
+nnoremap <leader>ft :Helptags!<CR>
 
 call s:ensure('vim-airline/vim-airline')
 let g:airline#extensions#tabline#enabled = 1
@@ -104,7 +105,10 @@ inoremap ww <Esc>:w<CR>
 " keep previous register after pasting in v mode
 xnoremap <leader>p "_dP
 vnoremap <leader>d "_d
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
 
+nnoremap J mzJ`z
 nnoremap <leader>P "+p
 nnoremap <leader>d "_d
 nnoremap <leader>r <C-r>
@@ -157,7 +161,37 @@ if executable('templ')
 autocmd BufWritePost *.templ silent! execute "!PATH=\"$PATH:$(go env GOPATH)/bin\" templ fmt <afile> >/dev/null 2>&1" | redraw!
 endif
 
+nnoremap <leader>ss :%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>
 " Snippets
 nnoremap <leader>si :-1read ~/.vim/snippets/go/iferr<CR>jf"a
 
+function! GitParagraphFzf()
+  let file = expand('%:p')
+  let start = line("'{")
+  let end = line("'}")
 
+  let range = start . ',' . end . ':' . shellescape(file)
+
+  " commits affecting paragraph
+  let cmd = 'git log --pretty=format:"%h %s" --no-patch -L ' . range
+
+  let source = systemlist(cmd)
+
+  call fzf#run(fzf#wrap({
+        \ 'source': source,
+        \ 'options': '--ansi --preview "git show --stat {1}"',
+        \ 'sink': function('s:OpenCommitFull')
+        \ }))
+endfunction
+
+function! s:OpenCommitFull(line)
+  let hash = split(a:line)[0]
+
+  let file = expand('%:p')
+
+  " FULL DIFF VIEW (no truncation)
+  execute 'tabnew'
+  execute 'terminal git difftool ' . hash . '^ ' . hash . ' -- ' . shellescape(file)
+endfunction
+
+nnoremap <leader>gl :call GitParagraphFzf()<CR>
