@@ -24,14 +24,20 @@ let g:netrw_altv=1
 let g:netrw_liststyle=3
 
 let s:plugin_dir = expand('~/.vim/plugged')
-function! s:ensure(repo)
+function! s:ensure(repo, ...)
+  let branch = get(a:, 1, '')
   let name = split(a:repo, '/')[-1]
   let path = s:plugin_dir . '/' . name
   if !isdirectory(path)
     if !isdirectory(s:plugin_dir)
       call mkdir(s:plugin_dir, 'p')
     endif
-    execute '!git clone --depth=1 https://github.com/' . a:repo . ' ' . shellescape(path)
+    let cmd = '!git clone --depth=1'
+    if branch != ''
+      let cmd .= ' --branch ' . shellescape(branch)
+    endif
+    let cmd .= ' https://github.com/' . a:repo . ' ' . shellescape(path)
+    execute cmd
   endif
   execute 'set runtimepath+=' . fnameescape(path)
 endfunction
@@ -195,3 +201,19 @@ function! s:OpenCommitFull(line)
 endfunction
 
 nnoremap <leader>gl :call GitParagraphFzf()<CR>
+
+call s:ensure("nvim-lua/plenary.nvim")
+call s:ensure("ThePrimeagen/harpoon", "harpoon2")
+
+lua <<EOF
+local harpoon = require("harpoon")
+harpoon:setup()
+vim.keymap.set("n", "<leader>tt", function() harpoon:list():add() end)
+vim.keymap.set("n", "<leader>tl", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+vim.keymap.set("n", "<leader>tn", function() harpoon:list():select(1) end)
+vim.keymap.set("n", "<leader>te", function() harpoon:list():select(2) end)
+vim.keymap.set("n", "<leader>ti", function() harpoon:list():select(3) end)
+vim.keymap.set("n", "<leader>to", function() harpoon:list():select(4) end)
+vim.keymap.set("n", "<leader>tu", function() harpoon:list():prev() end)
+vim.keymap.set("n", "<leader>ty", function() harpoon:list():next() end)
+EOF

@@ -46,3 +46,30 @@ git config --global difftool.nvimdiff.cmd 'nvim -d "$LOCAL" "$REMOTE"'
 
 - [Custom text objects](https://github.com/kana/vim-textobj-user)
 
+### Leader Keyboard
+q close buffer
+w
+f fzf
+p
+l lsp
+u undo tree toggle
+y
+g git
+a
+r ctrl-r (re-play after undo)
+s substitute and snippet
+t harpoon
+n window navigation
+e
+i ctrl-i (jump to next)
+o ctrl-o (jump to old)
+z ctrl-z (suspend)
+x execute current paragraph
+c
+v
+m
+d delete without filling the register
+h copy file path to clipboard
+b to netrw
+j
+k
