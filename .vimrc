@@ -65,8 +65,8 @@ let g:asyncomplete_auto_popup = 1
 let g:asyncomplete_auto_completeopt = 1
 nnoremap <leader>lh :LspHover <CR>
 nnoremap <leader>la :LspCodeAction <CR>
-nnoremap <leader>lf :LspDefinition<CR>
-nnoremap <leader>lpf :LspPeekDefinition<CR>
+nnoremap <leader>lt :LspDefinition<CR>
+nnoremap <leader>ls :LspPeekDefinition<CR>
 nnoremap <leader>ldd :LspDocumentDiagnostics <CR>
 nnoremap <leader>lnd :LspNextDiagnostic<CR>
 nnoremap <leader>lpd :LspPreviousDiagnostic<CR>
@@ -98,17 +98,15 @@ require("tokyonight").setup()
 vim.cmd.colorscheme("tokyonight-night")
 EOF
 
-" Keybindings insert mode
-inoremap qq <Esc>
 inoremap ww <Esc>:w<CR>
 
-" Keybindings normal mode
 nnoremap <leader>q :bd!<CR>
-nnoremap <leader>ee <c-z>
-nnoremap <leader>ei <c-i>
-nnoremap <leader>eo <c-o>
-nnoremap <leader>ex vip:!sh<CR>
-nnoremap <leader>eh :let @+ = expand('%')<CR>
+nnoremap <leader>z <c-z>
+nnoremap <leader>i <c-i>
+nnoremap <leader>o <c-o>
+nnoremap <leader>x vip:!sh<CR>
+nnoremap <leader>h :let @+ = expand('%')<CR>
+nnoremap <leader>b :e %:h<CR>
 
 nnoremap <leader>bn :bnext<CR>
 nnoremap <leader>bb :bprevious<CR>
