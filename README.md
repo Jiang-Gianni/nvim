@@ -22,6 +22,10 @@ mkdir -p ~/.config/nvim
 ln -s ~/.vimrc ~/.config/nvim/init.vim
 
 $(brew --prefix)/opt/fzf/install
+
+git config --global diff.tool nvimdiff
+git config --global difftool.prompt false
+git config --global difftool.nvimdiff.cmd 'nvim -d "$LOCAL" "$REMOTE"'
 ```
 
 ### Maybe useful stuff

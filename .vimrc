@@ -42,6 +42,7 @@ nnoremap <leader>fr :Rg <CR>
 nnoremap <leader>fR :RG <CR>
 nnoremap <leader>ff :Files<CR>
 nnoremap <leader>fg :GFiles?<CR>
+nnoremap <leader>fG :BCommits<CR>
 nnoremap <leader>fc :Colors<CR>
 nnoremap <leader>fl :Lines<CR>
 nnoremap <leader>fc :Changes<CR>
@@ -50,7 +51,6 @@ nnoremap <leader>fj :Jumps<CR>
 nnoremap <leader>fw :Windows<CR>
 nnoremap <leader>fh :History<CR>
 nnoremap <leader>fb :Buffers<CR>
-nnoremap <leader>fG :BCommits<CR>
 nnoremap <leader>fp :Maps<CR>
 nnoremap <leader>fe :Commands<CR>
 nnoremap <leader>ft :Helptags<CR>
@@ -78,9 +78,11 @@ nnoremap <leader>lpr :LspPreviousReference<CR>
 nnoremap <leader>lnw :LspNextWarning<CR>
 nnoremap <leader>lpw :LspPreviousWarning<CR>
 nnoremap <F2> :LspRename<CR>
+inoremap <F2> :LspRename<CR>
 
 call s:ensure('tpope/vim-fugitive')
 call s:ensure('airblade/vim-gitgutter')
+let g:gitgutter_map_keys = 0
 set updatetime=100
 set signcolumn=yes
 set cursorline
@@ -99,7 +101,13 @@ vim.cmd.colorscheme("tokyonight-night")
 EOF
 
 inoremap ww <Esc>:w<CR>
+" keep previous register after pasting in v mode
+xnoremap <leader>p "_dP
+vnoremap <leader>d "_d
 
+nnoremap <leader>P "+p
+nnoremap <leader>d "_d
+nnoremap <leader>r <C-r>
 nnoremap <leader>q :bd!<CR>
 nnoremap <leader>z <c-z>
 nnoremap <leader>i <c-i>
@@ -107,11 +115,16 @@ nnoremap <leader>o <c-o>
 nnoremap <leader>x vip:!sh<CR>
 nnoremap <leader>h :let @+ = expand('%')<CR>
 nnoremap <leader>b :e %:h<CR>
-
-nnoremap <leader>bn :bnext<CR>
-nnoremap <leader>bb :bprevious<CR>
-nnoremap <leader>cn :cnext<CR>
-nnoremap <leader>cc :cprevious<CR>
+nnoremap <leader>nw :wincmd k<CR>
+nnoremap <leader>nW :wincmd K<CR>
+nnoremap <leader>nr :wincmd j<CR>
+nnoremap <leader>nR :wincmd J<CR>
+nnoremap <leader>ns :wincmd l<CR>
+nnoremap <leader>nS :wincmd L<CR>
+nnoremap <leader>na :wincmd h<CR>
+nnoremap <leader>nA :wincmd H<CR>
+nnoremap <leader>nn :wincmd w<CR>
+nnoremap <leader>nt :wincmd W<CR>
 
 " Go LSP
 if executable('gopls')
@@ -145,6 +158,6 @@ autocmd BufWritePost *.templ silent! execute "!PATH=\"$PATH:$(go env GOPATH)/bin
 endif
 
 " Snippets
-nnoremap <leader>sife :-1read ~/.vim/snippets/go/iferr<CR>jf"a
+nnoremap <leader>si :-1read ~/.vim/snippets/go/iferr<CR>jf"a
 
 
