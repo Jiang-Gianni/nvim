@@ -60,7 +60,7 @@ r ctrl-r (re-play after undo)
 s substitute and snippet
 t harpoon
 n window navigation
-e
+e trouble quickfix toggle
 i ctrl-i (jump to next)
 o ctrl-o (jump to old)
 z ctrl-z (suspend)

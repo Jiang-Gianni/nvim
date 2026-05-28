@@ -204,6 +204,7 @@ nnoremap <leader>gl :call GitParagraphFzf()<CR>
 
 call s:ensure("nvim-lua/plenary.nvim")
 call s:ensure("ThePrimeagen/harpoon", "harpoon2")
+call s:ensure("folke/trouble.nvim")
 
 lua <<EOF
 local harpoon = require("harpoon")
@@ -216,4 +217,12 @@ vim.keymap.set("n", "<leader>ti", function() harpoon:list():select(3) end)
 vim.keymap.set("n", "<leader>to", function() harpoon:list():select(4) end)
 vim.keymap.set("n", "<leader>tu", function() harpoon:list():prev() end)
 vim.keymap.set("n", "<leader>ty", function() harpoon:list():next() end)
+
+require("trouble").setup({
+     auto_close = true,
+     focus = true,
+})
 EOF
+
+nnoremap <leader>e :Trouble quickfix toggle<CR>
+
