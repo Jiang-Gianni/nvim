@@ -19,6 +19,8 @@ set iskeyword+=-
 set path+=**
 set showcmd
 set ruler
+set wrap
+set breakindent
 let g:netrw_banner=0
 let g:netrw_altv=1
 let g:netrw_liststyle=3
@@ -47,7 +49,7 @@ call s:ensure('junegunn/fzf.vim')
 nnoremap <leader>fr :Rg! <CR>
 nnoremap <leader>fR :RG! <CR>
 nnoremap <leader>ff :Files!<CR>
-nnoremap <leader>fg :GFiles?<CR>
+nnoremap <leader>fg :GFiles!?<CR>
 nnoremap <leader>fG :BCommits!<CR>
 nnoremap <leader>fl :Lines!<CR>
 nnoremap <leader>fc :Commits!<CR>
@@ -70,10 +72,9 @@ call s:ensure('prabirshrestha/asyncomplete.vim')
 call s:ensure('prabirshrestha/asyncomplete-lsp.vim')
 let g:asyncomplete_auto_popup = 1
 let g:asyncomplete_auto_completeopt = 1
-nnoremap <leader>lh :LspHover <CR>
+nnoremap <leader>ls :LspHover <CR>
 nnoremap <leader>la :LspCodeAction <CR>
 nnoremap <leader>lt :LspDefinition<CR>
-nnoremap <leader>ls :LspPeekDefinition<CR>
 nnoremap <leader>ldd :LspDocumentDiagnostics <CR>
 nnoremap <leader>lnd :LspNextDiagnostic<CR>
 nnoremap <leader>lpd :LspPreviousDiagnostic<CR>
@@ -97,6 +98,18 @@ nnoremap <leader>gn :GitGutterNextHunk<CR>
 nnoremap <leader>gp :GitGutterPrevHunk<CR>
 
 call s:ensure('mbbill/undotree')
+if has("persistent_undo")
+   let target_path = expand('~/.undodir')
+
+    " create the directory and any parent directories
+    " if the location does not exist.
+    if !isdirectory(target_path)
+        call mkdir(target_path, "p", 0700)
+    endif
+
+    let &undodir=target_path
+    set undofile
+endif
 nnoremap <leader>u :UndotreeToggle<CR>
 
 call s:ensure('romus204/tree-sitter-manager.nvim')
@@ -158,18 +171,14 @@ let g:go_highlight_format_string_errors = 1
 autocmd BufWritePre *.go silent LspDocumentFormatSync
 autocmd BufWritePre *.go silen call execute('LspCodeAction source.organizeImports')
 
-" Diagnostic
-let g:lsp_diagnostics_virtual_text_prefix = "● "
-let g:lsp_diagnostics_virtual_text_align = "after"
-
 set autoread
 if executable('templ')
 autocmd BufWritePost *.templ silent! execute "!PATH=\"$PATH:$(go env GOPATH)/bin\" templ fmt <afile> >/dev/null 2>&1" | redraw!
 endif
 
-nnoremap <leader>ss :%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>
+nnoremap <leader>as :%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>
 " Snippets
-nnoremap <leader>si :-1read ~/.vim/snippets/go/iferr<CR>jf"a
+nnoremap <leader>ai :-1read ~/.vim/snippets/go/iferr<CR>jf"a
 
 function! GitParagraphFzf()
   let file = expand('%:p')
@@ -205,6 +214,8 @@ nnoremap <leader>gl :call GitParagraphFzf()<CR>
 call s:ensure("nvim-lua/plenary.nvim")
 call s:ensure("ThePrimeagen/harpoon", "harpoon2")
 call s:ensure("folke/trouble.nvim")
+call s:ensure("ggandor/leap.nvim")
+call s:ensure("tpope/vim-commentary")
 
 lua <<EOF
 local harpoon = require("harpoon")
@@ -222,7 +233,60 @@ require("trouble").setup({
      auto_close = true,
      focus = true,
 })
+
+vim.keymap.set("n", "<leader>e", function()
+  vim.cmd("cclose")
+  vim.cmd("Trouble quickfix toggle")
+end)
+
+vim.keymap.set({ 'n', 'x', 'o' }, 's', '<Plug>(leap)')
+vim.keymap.set('n',               'S', '<Plug>(leap-from-window)')
+
+vim.notify = function(msg, level)
+  if level == vim.log.levels.ERROR then
+    vim.api.nvim_err_writeln(msg)
+  end
+end
+
+vim.diagnostic.config {
+    update_in_insert = false,
+    severity_sort = true,
+    float = { border = 'rounded', source = 'if_many' },
+    underline = { severity = { min = vim.diagnostic.severity.WARN } },
+
+    -- Can switch between these as you prefer
+    virtual_text = true, -- Text shows up at the end of the line
+    virtual_lines = false, -- Text shows up underneath the line, with virtual lines
+
+    -- Auto open the float, so you can easily read the errors when jumping with `[d` and `]d`
+    jump = {
+      on_jump = function(_, bufnr)
+        vim.diagnostic.open_float {
+          bufnr = bufnr,
+          scope = 'cursor',
+          focus = false,
+        }
+      end,
+    },
+  }
+
+  vim.api.nvim_create_autocmd('TextYankPost', {
+    desc = 'Highlight when yanking (copying) text',
+    group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+    callback = function() vim.hl.on_yank() end,
+  })
+
 EOF
 
-nnoremap <leader>e :Trouble quickfix toggle<CR>
+call s:ensure("mattn/vim-lsp-settings")
+call s:ensure("dart-lang/dart-vim-plugin")
+
+if executable('dart')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'dartls',
+        \ 'cmd': {server_info->['dart', 'language-server']},
+        \ 'allowlist': ['dart'],
+        \ })
+endif
+autocmd BufWritePre *.dart LspDocumentFormatSync
 

@@ -55,9 +55,9 @@ l lsp
 u undo tree toggle
 y
 g git
-a
+a substitute and snippet
 r ctrl-r (re-play after undo)
-s substitute and snippet
+s leap.nvim search 
 t harpoon
 n window navigation
 e trouble quickfix toggle
