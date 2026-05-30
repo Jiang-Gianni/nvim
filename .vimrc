@@ -106,15 +106,54 @@ augroup END
 call s:ensure('tpope/vim-fugitive')
 set updatetime=100
 set signcolumn=yes
-set cursorline
+set cursorline cursorcolumn
+set splitbelow splitright
 call s:ensure('lewis6991/gitsigns.nvim')
 nnoremap <leader>ge :Gitsigns nav_hunk next<CR>
 nnoremap <leader>gs :Gitsigns nav_hunk prev<CR>
-nnoremap <leader>gp :Gitsigns preview_hunk_inline<CR>
-nnoremap <leader>gd :Gitsigns diffthis main<CR>
-nnoremap <leader>gc :Gitsigns setqflist all<CR>
+nnoremap <leader>gh :Gitsigns preview_hunk_inline<CR>
+nnoremap <leader>gd :Gitsigns diffthis<CR>
+nnoremap <leader>gq :Gitsigns setqflist all<CR>
 nnoremap <leader>gx :Gitsigns toggle_deleted<CR>
 nnoremap <leader>gb :Gitsigns blame<CR>
+
+nnoremap <leader>go :call OpenGithubPR()<CR>
+nnoremap <leader>ga :Git add .<CR>
+nnoremap <leader>gc :Git commit<CR>
+nnoremap <leader>gp :Git push -u origin HEAD<CR>
+nnoremap <leader>gf :Git push -u origin HEAD --force<CR>
+
+function! OpenGithubPR()
+    let l:remote = trim(system('git remote get-url origin'))
+    let l:branch = trim(system('git branch --show-current'))
+
+    " Convert SSH URL to HTTPS
+    let l:url = substitute(
+                \ l:remote,
+                \ '^git@github\.com:',
+                \ 'https://github.com/',
+                \ '')
+
+    " Remove trailing .git
+    let l:url = substitute(l:url, '\.git$', '', '')
+
+    let l:pr_url = l:url . '/pull/new/' . l:branch
+
+    if has('macunix')
+        call system('open ' . shellescape(l:pr_url))
+    elseif has('unix')
+        call system('xdg-open ' . shellescape(l:pr_url) . ' >/dev/null 2>&1 &')
+    elseif has('win32') || has('win64')
+        call system('start "" ' . shellescape(l:pr_url))
+    endif
+
+    echo l:pr_url
+endfunction
+
+augroup git_commit
+  autocmd!
+  autocmd FileType gitcommit startinsert
+augroup END
 
 if has("nvim")
 lua <<EOF
@@ -264,46 +303,13 @@ nnoremap <leader>as :%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>
 " Snippets
 nnoremap <leader>ai :-1read ~/.vim/snippets/go/iferr<CR>jf"a
 
-function! GitParagraphFzf()
-  let file = expand('%:p')
-  let start = line("'{")
-  let end = line("'}")
-
-  let range = start . ',' . end . ':' . shellescape(file)
-
-  " commits affecting paragraph
-  let cmd = 'git log --pretty=format:"%h %s" --no-patch -L ' . range
-
-  let source = systemlist(cmd)
-
-  call fzf#run(fzf#wrap({
-        \ 'source': source,
-        \ 'options': '--ansi --preview "git show --stat {1}"',
-        \ 'sink': function('s:OpenCommitFull')
-        \ }))
-endfunction
-
-function! s:OpenCommitFull(line)
-  let hash = split(a:line)[0]
-
-  let file = expand('%:p')
-
-  " FULL DIFF VIEW (no truncation)
-  execute 'tabnew'
-  execute 'terminal git difftool ' . hash . '^ ' . hash . ' -- ' . shellescape(file)
-endfunction
-
-nnoremap <leader>gl :call GitParagraphFzf()<CR>
-
 call s:ensure("nvim-lua/plenary.nvim")
 call s:ensure("ThePrimeagen/harpoon", "harpoon2")
 call s:ensure("ggandor/leap.nvim")
 call s:ensure("tpope/vim-commentary")
-call s:ensure('lukas-reineke/indent-blankline.nvim')
 
 if has('nvim')
 lua <<EOF
-require("ibl").setup()
 local harpoon = require("harpoon")
 harpoon:setup()
 vim.keymap.set("n", "<leader>tt", function() harpoon:list():add() end)
@@ -354,15 +360,6 @@ vim.diagnostic.config {
   vim.api.nvim_create_autocmd('TextYankPost', {
     callback = function() vim.hl.on_yank() end,
   })
-
-  local os = vim.uv.os_uname().sysname
-local xplat_set = vim.keymap.set
-if os == "Darwin" then
-        xplat_set = function(modes, lhs, rhs, opts)
-                lhs = lhs:gsub("[cC]%-", "M-") -- replace control with Option
-                vim.keymap.set(modes, lhs, rhs, opts)
-        end
-end
 
 EOF
 endif
