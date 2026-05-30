@@ -48,7 +48,7 @@ git config --global difftool.nvimdiff.cmd 'nvim -d "$LOCAL" "$REMOTE"'
 
 ### Leader Keyboard
 q close buffer
-w
+w save buffer
 f fzf
 p
 l lsp

@@ -21,6 +21,9 @@ set showcmd
 set ruler
 set wrap
 set breakindent
+set ignorecase smartcase smartindent
+set linebreak
+set wildmenu
 let g:netrw_banner=0
 let g:netrw_altv=1
 let g:netrw_liststyle=3
@@ -66,12 +69,14 @@ nnoremap <leader>ft :Helptags!<CR>
 
 call s:ensure('vim-airline/vim-airline')
 let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail'
 
 call s:ensure('prabirshrestha/vim-lsp')
 call s:ensure('prabirshrestha/asyncomplete.vim')
 call s:ensure('prabirshrestha/asyncomplete-lsp.vim')
 let g:asyncomplete_auto_popup = 1
 let g:asyncomplete_auto_completeopt = 1
+let g:asyncomplete_lsp_inline_complete_accept_key = 1
 nnoremap <leader>ls :LspHover <CR>
 nnoremap <leader>la :LspCodeAction <CR>
 nnoremap <leader>lt :LspDefinition<CR>
@@ -80,7 +85,6 @@ nnoremap <leader>lnd :LspNextDiagnostic<CR>
 nnoremap <leader>lpd :LspPreviousDiagnostic<CR>
 nnoremap <leader>lne :LspNextError<CR>
 nnoremap <leader>lpe :LspPreviousError<CR>
-nnoremap <leader>lr :LspReferences<CR>
 nnoremap <leader>lnr :LspNextReference<CR>
 nnoremap <leader>lpr :LspPreviousReference<CR>
 nnoremap <leader>lnw :LspNextWarning<CR>
@@ -88,14 +92,85 @@ nnoremap <leader>lpw :LspPreviousWarning<CR>
 nnoremap <F2> :LspRename<CR>
 inoremap <F2> :LspRename<CR>
 
+nnoremap <leader>lr <Cmd>normal! mo<CR><Cmd>LspReferences<CR> 
+nnoremap <leader>p `o
+nnoremap <leader>e <Cmd>normal! mo<CR><Cmd>copen<CR> 
+
+augroup qf_mappings
+  autocmd!
+  autocmd FileType qf nnoremap <buffer> e :cnext \| copen <CR>
+  autocmd FileType qf nnoremap <buffer> s :cprev \| copen <CR>
+  autocmd FileType qf nnoremap <buffer> t :cclose<CR>
+augroup END
+
 call s:ensure('tpope/vim-fugitive')
-call s:ensure('airblade/vim-gitgutter')
-let g:gitgutter_map_keys = 0
 set updatetime=100
 set signcolumn=yes
 set cursorline
-nnoremap <leader>gn :GitGutterNextHunk<CR>
-nnoremap <leader>gp :GitGutterPrevHunk<CR>
+call s:ensure('lewis6991/gitsigns.nvim')
+nnoremap <leader>ge :Gitsigns nav_hunk next<CR>
+nnoremap <leader>gs :Gitsigns nav_hunk prev<CR>
+nnoremap <leader>gp :Gitsigns preview_hunk_inline<CR>
+nnoremap <leader>gd :Gitsigns diffthis main<CR>
+nnoremap <leader>gc :Gitsigns setqflist all<CR>
+nnoremap <leader>gx :Gitsigns toggle_deleted<CR>
+nnoremap <leader>gb :Gitsigns blame<CR>
+
+if has("nvim")
+lua <<EOF
+vim.keymap.set({'o', 'x'}, 'ih', '<Cmd>Gitsigns select_hunk<CR>')
+require('gitsigns').setup{
+ signs = {
+    add          = { text = '┃' },
+    change       = { text = '┃' },
+    delete       = { text = '_' },
+    topdelete    = { text = '‾' },
+    changedelete = { text = '~' },
+    untracked    = { text = '┆' },
+  },
+  signs_staged = {
+    add          = { text = '┃' },
+    change       = { text = '┃' },
+    delete       = { text = '_' },
+    topdelete    = { text = '‾' },
+    changedelete = { text = '~' },
+    untracked    = { text = '┆' },
+  },
+  signs_staged_enable = true,
+  signcolumn = true,  -- Toggle with `:Gitsigns toggle_signs`
+  numhl      = true, -- Toggle with `:Gitsigns toggle_numhl`
+  linehl     = false, -- Toggle with `:Gitsigns toggle_linehl`
+  word_diff  = false, -- Toggle with `:Gitsigns toggle_word_diff`
+  watch_gitdir = {
+    follow_files = true
+  },
+  auto_attach = true,
+  attach_to_untracked = false,
+  current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
+  current_line_blame_opts = {
+    virt_text = true,
+    virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
+    delay = 1000,
+    ignore_whitespace = false,
+    virt_text_priority = 100,
+    use_focus = true,
+  },
+  current_line_blame_formatter = '<author>, <author_time:%R> - <summary>',
+  blame_formatter = nil, -- Use default
+  sign_priority = 6,
+  update_debounce = 100,
+  status_formatter = nil, -- Use default
+  max_file_length = 40000, -- Disable if file is longer than this (in lines)
+  preview_config = {
+    -- Options passed to nvim_open_win
+    style = 'minimal',
+    relative = 'cursor',
+    row = 0,
+    col = 1
+  },
+}
+EOF
+endif
 
 call s:ensure('mbbill/undotree')
 if has("persistent_undo")
@@ -110,17 +185,24 @@ if has("persistent_undo")
     let &undodir=target_path
     set undofile
 endif
+let g:undotree_SetFocusWhenToggle = 1
+let g:undotree_ShortIndicators = 1
+let g:undotree_WindowLayout = 2
 nnoremap <leader>u :UndotreeToggle<CR>
 
 call s:ensure('romus204/tree-sitter-manager.nvim')
 call s:ensure('folke/tokyonight.nvim')
+
+if has('nvim')
 lua <<EOF
 require("tree-sitter-manager").setup()
 require("tokyonight").setup()
 vim.cmd.colorscheme("tokyonight-night")
 EOF
+endif
 
 inoremap ww <Esc>:w<CR>
+nnoremap ww :w<CR>
 " keep previous register after pasting in v mode
 xnoremap <leader>p "_dP
 vnoremap <leader>d "_d
@@ -155,11 +237,15 @@ if executable('gopls')
     autocmd!
     autocmd User lsp_setup call lsp#register_server({
           \ 'name': 'gopls',
-          \ 'cmd': {server_info->['gopls']},
-          \ 'allowlist': ['go'],
+          \ 'cmd': {server_info->['gopls', '-remote=auto']},
+          \ 'allowlist': ['go', 'gomod'],
           \ })
   augroup END
+    autocmd BufWritePre *.go
+        \ call execute('LspDocumentFormatSync') |
+        \ call execute('LspCodeActionSync source.organizeImports')
 endif
+let g:go_code_completion_enabled = 1
 
 let g:go_highlight_comma = 1
 let g:go_highlight_semicolon = 1
@@ -168,8 +254,6 @@ let g:go_highlight_struct_fields = 1
 let g:go_highlight_variable_assignments = 1
 let g:go_highlight_fields = 1
 let g:go_highlight_format_string_errors = 1
-autocmd BufWritePre *.go silent LspDocumentFormatSync
-autocmd BufWritePre *.go silen call execute('LspCodeAction source.organizeImports')
 
 set autoread
 if executable('templ')
@@ -213,11 +297,13 @@ nnoremap <leader>gl :call GitParagraphFzf()<CR>
 
 call s:ensure("nvim-lua/plenary.nvim")
 call s:ensure("ThePrimeagen/harpoon", "harpoon2")
-call s:ensure("folke/trouble.nvim")
 call s:ensure("ggandor/leap.nvim")
 call s:ensure("tpope/vim-commentary")
+call s:ensure('lukas-reineke/indent-blankline.nvim')
 
+if has('nvim')
 lua <<EOF
+require("ibl").setup()
 local harpoon = require("harpoon")
 harpoon:setup()
 vim.keymap.set("n", "<leader>tt", function() harpoon:list():add() end)
@@ -229,18 +315,13 @@ vim.keymap.set("n", "<leader>to", function() harpoon:list():select(4) end)
 vim.keymap.set("n", "<leader>tu", function() harpoon:list():prev() end)
 vim.keymap.set("n", "<leader>ty", function() harpoon:list():next() end)
 
-require("trouble").setup({
-     auto_close = true,
-     focus = true,
-})
-
-vim.keymap.set("n", "<leader>e", function()
-  vim.cmd("cclose")
-  vim.cmd("Trouble quickfix toggle")
-end)
-
 vim.keymap.set({ 'n', 'x', 'o' }, 's', '<Plug>(leap)')
 vim.keymap.set('n',               'S', '<Plug>(leap-from-window)')
+local leap = require("leap")
+leap.opts.safe_labels = {}
+leap.opts.labels = "setnriaofuplwyqjbmghdzxc"
+leap.opts.max_phase_one_targets = 0
+leap.opts.special_keys.next_group = "<space>"
 
 vim.notify = function(msg, level)
   if level == vim.log.levels.ERROR then
@@ -251,7 +332,7 @@ end
 vim.diagnostic.config {
     update_in_insert = false,
     severity_sort = true,
-    float = { border = 'rounded', source = 'if_many' },
+    float = { border = 'rounded', source = true},
     underline = { severity = { min = vim.diagnostic.severity.WARN } },
 
     -- Can switch between these as you prefer
@@ -271,12 +352,20 @@ vim.diagnostic.config {
   }
 
   vim.api.nvim_create_autocmd('TextYankPost', {
-    desc = 'Highlight when yanking (copying) text',
-    group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
     callback = function() vim.hl.on_yank() end,
   })
 
+  local os = vim.uv.os_uname().sysname
+local xplat_set = vim.keymap.set
+if os == "Darwin" then
+        xplat_set = function(modes, lhs, rhs, opts)
+                lhs = lhs:gsub("[cC]%-", "M-") -- replace control with Option
+                vim.keymap.set(modes, lhs, rhs, opts)
+        end
+end
+
 EOF
+endif
 
 call s:ensure("mattn/vim-lsp-settings")
 call s:ensure("dart-lang/dart-vim-plugin")
